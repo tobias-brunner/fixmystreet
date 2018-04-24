@@ -18,6 +18,12 @@ var fixmystreet = fixmystreet || {};
         }
     });
 
+    // bodies data needs slightly different handling
+    if (map_data.getAttribute('data-bodies')) {
+       var bodies = '' + map_data.getAttribute('data-bodies');
+       fixmystreet.bodies = bodies.split(',');
+    }
+
     fixmystreet.area = fixmystreet.area ? fixmystreet.area.split(',') : [];
     if (fixmystreet.map_type) {
         var s = fixmystreet.map_type.split('.');

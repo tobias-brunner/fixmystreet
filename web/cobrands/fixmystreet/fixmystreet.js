@@ -410,7 +410,7 @@ $.extend(fixmystreet.set_up, {
                 $category_meta.empty();
             }
             if (data.bodies) {
-                if (fixmystreet.map) {
+                if (fixmystreet) {
                     fixmystreet.bodies = data.bodies;
                 }
             }
@@ -888,7 +888,7 @@ $.extend(fixmystreet.set_up, {
             }
         });
     });
-  }
+  },
 
 });
 
@@ -981,12 +981,12 @@ fixmystreet.update_pin = function(lonlat, savePushState) {
         }
 
         if (data.bodies) {
-            if (fixmystreet.map) {
-                fixmystreet.map.bodies = data.bodies;
+            if (fixmystreet) {
+                fixmystreet.bodies = data.bodies;
             }
         } else {
-            if (fixmystreet.map) {
-                fixmystreet.map.bodies = [];
+            if (fixmystreet) {
+                fixmystreet.bodies = [];
             }
         }
     });
