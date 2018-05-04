@@ -466,6 +466,8 @@ sub inspect : Private {
             $problem->response_priority( $problem->response_priorities->find({ id => $c->get_param('priority') }) );
         }
 
+        $c->cobrand->call_hook(report_inspect_update_extra => $problem);
+
         if ($valid) {
             if ( $reputation_change != 0 ) {
                 $problem->user->update_reputation($reputation_change);
