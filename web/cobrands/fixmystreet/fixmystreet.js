@@ -409,6 +409,9 @@ $.extend(fixmystreet.set_up, {
             } else {
                 $category_meta.empty();
             }
+            if (fixmystreet) {
+                fixmystreet.do_not_send = [];
+            }
             if (data.bodies) {
                 if (fixmystreet) {
                     fixmystreet.bodies = data.bodies;
@@ -992,10 +995,12 @@ fixmystreet.update_pin = function(lonlat, savePushState) {
         if (data.bodies) {
             if (fixmystreet) {
                 fixmystreet.bodies = data.bodies;
+                fixmystreet.do_not_send = [];
             }
         } else {
             if (fixmystreet) {
                 fixmystreet.bodies = [];
+                fixmystreet.do_not_send = [];
             }
         }
     });
