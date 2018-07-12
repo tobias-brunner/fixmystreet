@@ -46,7 +46,7 @@ OpenLayers.Layer.VectorAsset = OpenLayers.Class(OpenLayers.Layer.Vector, {
                 }
             }
         } else {
-            if (fixmystreet.bodies && this.fixmystreet.body) {
+            if (fixmystreet.bodies.length && this.fixmystreet.body) {
                 this.setVisibility(fixmystreet.bodies.indexOf('' + this.fixmystreet.body) != -1 );
             }
         }
@@ -71,15 +71,13 @@ OpenLayers.Layer.VectorNearest = OpenLayers.Class(OpenLayers.Layer.VectorAsset, 
     selected_feature: null,
 
     initialize: function(name, options) {
-        OpenLayers.Layer.Vector.prototype.initialize.apply(this, arguments);
+        OpenLayers.Layer.VectorAsset.prototype.initialize.apply(this, arguments);
         $(fixmystreet).on('maps:update_pin', this.checkFeature.bind(this));
         $(fixmystreet).on('assets:selected', this.checkFeature.bind(this));
         // Might only be able to fill in fields once they've been returned from the server
         $(fixmystreet).on('report_new:category_change:extras_received', this.changeCategory.bind(this));
-        $(fixmystreet).on('report_new:category_change:extras_received', this.update_layer_visibility.bind(this));
         // But also want to do it immediately in case it's hiding the form or something
         $(fixmystreet).on('report_new:category_change', this.changeCategory.bind(this));
-        $(fixmystreet).on('report_new:category_change', this.update_layer_visibility.bind(this));
     },
 
     checkFeature: function(evt, lonlat) {
