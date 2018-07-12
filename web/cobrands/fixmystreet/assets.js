@@ -19,8 +19,6 @@ var fixmystreet = fixmystreet || {};
 OpenLayers.Layer.VectorAsset = OpenLayers.Class(OpenLayers.Layer.Vector, {
     initialize: function(name, options) {
         OpenLayers.Layer.Vector.prototype.initialize.apply(this, arguments);
-        // Might only be able to fill in fields once they've been returned from the server
-        $(fixmystreet).on('report_new:category_change:extras_received', this.update_layer_visibility.bind(this));
         // But also want to do it immediately in case it's hiding the form or something
         $(fixmystreet).on('report_new:category_change', this.update_layer_visibility.bind(this));
     },
