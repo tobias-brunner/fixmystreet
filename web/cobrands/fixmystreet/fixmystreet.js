@@ -410,9 +410,7 @@ $.extend(fixmystreet.set_up, {
                 $category_meta.empty();
             }
             if (data.bodies) {
-                if (fixmystreet) {
-                    fixmystreet.bodies = data.bodies;
-                }
+                fixmystreet.bodies = data.bodies;
             }
             $(fixmystreet).trigger('report_new:category_change:extras_received');
         });
@@ -945,6 +943,12 @@ fixmystreet.update_pin = function(lonlat, savePushState) {
             lb.before(data.extra_name_info);
         }
 
+        if (data.bodies) {
+            fixmystreet.bodies = data.bodies;
+        } else {
+            fixmystreet.bodies = [];
+        }
+
         // If the category filter appears on the map and the user has selected
         // something from it, then pre-fill the category field in the report,
         // if it's a value already present in the drop-down.
@@ -978,16 +982,6 @@ fixmystreet.update_pin = function(lonlat, savePushState) {
             $('#js-contribute-as-wrapper').show();
         } else {
             $('#js-contribute-as-wrapper').hide();
-        }
-
-        if (data.bodies) {
-            if (fixmystreet) {
-                fixmystreet.bodies = data.bodies;
-            }
-        } else {
-            if (fixmystreet) {
-                fixmystreet.bodies = [];
-            }
         }
     });
 
