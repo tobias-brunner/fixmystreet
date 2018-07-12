@@ -84,7 +84,7 @@ OpenLayers.Layer.VectorNearest = OpenLayers.Class(OpenLayers.Layer.VectorAsset, 
         this.getNearest(lonlat);
         this.updateUSRNField();
         if (this.fixmystreet.road) {
-          var valid_category = this.fixmystreet.all_categories || (this.fixmystreet.asset_category && fixmystreet.assets.check_layer_relevant( this.fixmystreet, $('select#form_category').val() ) );
+            var valid_category = this.fixmystreet.all_categories || (this.fixmystreet.asset_category && fixmystreet.assets.check_layer_relevant( this.fixmystreet, $('select#form_category').val() ) );
             if (!valid_category || !this.selected_feature) {
                 this.road_not_found();
             } else {
