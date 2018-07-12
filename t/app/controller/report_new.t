@@ -100,16 +100,6 @@ my $contact10 = $mech->create_contact_ok(
     category => 'Street lighting',
     email => 'streetlights-2326@example.com',
 );
-my $contact11 = $mech->create_contact_ok(
-    body_id => $body_ids{2237}, # Cheltenham
-    category => 'Street lighting',
-    email => 'streetlights-2237@example.com',
-);
-my $contact12 = $mech->create_contact_ok(
-    body_id => $body_ids{2421}, # Cheltenham
-    category => 'Potholes',
-    email => 'potholes-2421@example.com',
-);
 
 # test that the various bit of form get filled in and errors correctly
 # generated.
@@ -1187,28 +1177,6 @@ subtest "test report creation for a category that is non public" => sub {
     $contact1->update( { non_public => 0 } );
 };
 
-$contact2->category( "Pothol\xc3\xa9s" );
-$contact2->update;
-
-my $extra_details;
-FixMyStreet::override_config {
-    ALLOWED_COBRANDS => [ { fixmystreet => '.' } ],
-    MAPIT_URL => 'http://mapit.uk/',
-}, sub {
-    $extra_details = $mech->get_ok_json( '/report/new/ajax?latitude=' . $saved_lat . '&longitude=' . $saved_lon );
-};
-$mech->content_contains( "Pothol\xc3\xa9s" );
-like $extra_details->{councils_text}, qr/<strong>Cheltenham/;
-ok !$extra_details->{titles_list}, 'Non Bromley does not send back list of titles';
-
-FixMyStreet::override_config {
-    ALLOWED_COBRANDS => [ { fixmystreet => '.' } ],
-    MAPIT_URL => 'http://mapit.uk/',
-}, sub {
-    $extra_details = $mech->get_ok_json( '/report/new/ajax?latitude=51.4021&longitude=0.01578');
-};
-ok $extra_details->{titles_list}, 'Bromley sends back list of titles';
-
 #### test uploading an image
 
 #### test completing a partial report (eq flickr upload)
@@ -1898,6 +1866,7 @@ subtest "extra google analytics code displayed on email confirmation problem cre
     };
 };
 
+my $inspector = $mech->create_user_ok('inspector@example.org', name => 'inspector', from_body => $bodies[0]);
 foreach my $test (
   { non_public => 0 },
   { non_public => 1 },
@@ -1910,12 +1879,11 @@ foreach my $test (
     }, sub {
         $mech->log_out_ok;
 
-        my $user = $mech->create_user_ok('inspector@example.org', name => 'inspector', from_body => $bodies[0]);
-        $user->user_body_permissions->find_or_create({
+        $inspector->user_body_permissions->find_or_create({
             body => $bodies[0],
             permission_type => 'planned_reports',
         });
-        $user->user_body_permissions->find_or_create({
+        $inspector->user_body_permissions->find_or_create({
             body => $bodies[0],
             permission_type => 'report_inspect',
         });
@@ -1950,8 +1918,12 @@ foreach my $test (
   };
 }
 
+$contact2->category( "Pothol\xc3\xa9s" );
+$contact2->update;
+
 subtest "check map click ajax response" => sub {
     $mech->log_out_ok;
+    my $extra_details;
     FixMyStreet::override_config {
         ALLOWED_COBRANDS => [ { fixmystreet => '.' } ],
         MAPIT_URL => 'http://mapit.uk/',
@@ -1971,14 +1943,15 @@ subtest "check map click ajax response" => sub {
         ALLOWED_COBRANDS => [ { fixmystreet => '.' } ],
         MAPIT_URL => 'http://mapit.uk/',
     }, sub {
-        $extra_details = $mech->get_ok_json( '/report/new/ajax?latitude=51.754926&longitude=-1.256179' );
+        $extra_details = $mech->get_ok_json( '/report/new/ajax?latitude=' . $saved_lat . '&longitude=' . $saved_lon );
     };
     # this order seems to be random so check individually/sort
-    like $extra_details->{councils_text}, qr/Oxford City Council/, 'correct council text for two tier';
-    like $extra_details->{councils_text}, qr/Oxfordshire County Council/, 'correct council text for two tier';
-    like $extra_details->{category}, qr/Potholes.*Street lighting/, 'category looks correct for two tier council';
+    like $extra_details->{councils_text}, qr/Cheltenham Borough Council/, 'correct council text for two tier';
+    like $extra_details->{councils_text}, qr/Gloucestershire County Council/, 'correct council text for two tier';
+    like $extra_details->{category}, qr/Pothol\x{00E9}s.*Street lighting/, 'category looks correct for two tier council';
     my @sorted_bodies = sort @{ $extra_details->{bodies} };
-    is_deeply \@sorted_bodies, [ $body_ids{2237}, $body_ids{2421} ], 'correct bodies for two tier';
+    is_deeply \@sorted_bodies, [ $body_ids{2226}, $body_ids{2326} ], 'correct bodies for two tier';
+    ok !$extra_details->{titles_list}, 'Non Bromley does not send back list of titles';
 
     FixMyStreet::override_config {
         ALLOWED_COBRANDS => [ { fixmystreet => '.' } ],
@@ -1989,17 +1962,25 @@ subtest "check map click ajax response" => sub {
     like $extra_details->{councils_text}, qr/^These will be published online for others to see/, 'correct council text for council with no contacts';
     is $extra_details->{category}, '', 'category is empty for council with no contacts';
     is_deeply $extra_details->{bodies}, [ $body_ids{2535} ], 'correct bodies for council with no contacts';
+
+    FixMyStreet::override_config {
+        ALLOWED_COBRANDS => [ { fixmystreet => '.' } ],
+        MAPIT_URL => 'http://mapit.uk/',
+    }, sub {
+        $extra_details = $mech->get_ok_json( '/report/new/ajax?latitude=51.4021&longitude=0.01578');
+    };
+    ok $extra_details->{titles_list}, 'Bromley sends back list of titles';
 };
 
 subtest "check map click ajax response for inspector" => sub {
     $mech->log_out_ok;
 
-    my $user = $mech->create_user_ok('inspector@example.org', name => 'inspector', from_body => $bodies[0]);
-    $user->user_body_permissions->find_or_create({
+    my $extra_details;
+    $inspector->user_body_permissions->find_or_create({
         body => $bodies[0],
         permission_type => 'planned_reports',
     });
-    $user->user_body_permissions->find_or_create({
+    $inspector->user_body_permissions->find_or_create({
         body => $bodies[0],
         permission_type => 'report_inspect',
     });
@@ -2043,6 +2024,7 @@ for my $test (
 ) {
     subtest $test->{desc} => sub {
         $mech->log_out_ok;
+        my $extra_details;
         (my $name = $test->{desc}) =~ s/.*(contri.*)/$1/;
         my $user = $mech->create_user_ok("$name\@example.org", name => 'test user', from_body => $bodies[0]);
         for my $p ( keys %{$test->{permissions}} ) {
